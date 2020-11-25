@@ -192,7 +192,6 @@ scored_forecasters = lapply(score_cards,
 scored_forecasters = unlist(scored_forecasters)
 
 ahead = 1:4
-last_date = as.Date("2020-10-19")
 response_dat = "usa-facts"
 response_sig = "deaths_incidence_num"
 err_measures = list(wis = weighted_interval_score, ae = absolute_error,
@@ -205,7 +204,7 @@ for (i in 1:length(predictions_cards)) {
   cat(name_of_forecaster)
   given_dates = do.call("c", lapply(predictions_cards[[i]], function(x) {
     attributes(x)$forecast_date }))
-  given_dates_trimmed = unique(given_dates[given_dates <= last_date])
+  given_dates_trimmed = unique(given_dates)
   if (name_of_forecaster %in% scored_forecasters){
     forecaster_idx = which(scored_forecasters == name_of_forecaster)
     score_dates = attributes(score_cards[[forecaster_idx]][[1]])$forecast_date
@@ -215,6 +214,9 @@ for (i in 1:length(predictions_cards)) {
                                          response_data_source = response_dat,
                                          response_signal = response_sig,
                                          forecast_date = given_dates_trimmed)
+  is_evaluable_prediction = lapply(given_predictions, FUN = function(x) { 
+    with(attributes(x), forecast_date < today() - 7 * ahead)})
+  given_predictions = given_predictions[unlist(is_evaluable_prediction)]
   if(length(given_predictions) > 0){
     score_cards_new[[i]] = evaluate_predictions(given_predictions, err_measures,
                                                 backfill_buffer = 0)
