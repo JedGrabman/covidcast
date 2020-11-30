@@ -207,7 +207,7 @@ for (i in 1:length(predictions_cards)) {
   given_dates_trimmed = unique(given_dates)
   if (name_of_forecaster %in% scored_forecasters){
     forecaster_idx = which(scored_forecasters == name_of_forecaster)
-    score_dates = attributes(score_cards[[forecaster_idx]][[1]])$forecast_date
+    score_dates = score_cards[[forecaster_idx]][[1]]$forecast_date
     given_dates_trimmed = as_date(setdiff(given_dates_trimmed, score_dates))
   }
   given_predictions = filter_predictions(predictions_cards[[i]], ahead = ahead,
@@ -246,6 +246,14 @@ for (i in 1:length(forecasters)){
   }
 }
 score_cards = score_cards_comb
+
+# May not be necessary, but better to keep it in sync.
+for (i in 1:length(score_cards)){
+  for (j in 1:length(score_cards[[i]])){
+    attributes(score_cards[[i]][[j]])$forecast_dates = 
+      sort(unique(score_cards[[i]][[j]]$forecast_date))
+  }
+}
 ```
 
 As the above contained some pretty expensive steps, we save the results in an
